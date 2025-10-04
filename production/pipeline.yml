@@ -1,0 +1,5 @@
+# this will contain all the steps to be run in exact order, so we can load them as a script
+pipeline:
+
+columns_to_remove:
+
