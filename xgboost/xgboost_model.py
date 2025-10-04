@@ -68,7 +68,7 @@ class XGBoostModel:
         self.y_test = None
         
     
-    def preprocess_data(self, dataset_path, target):
+    def preprocess_data(self, dataset_path, target, remove_classifier_columns=False):
         """
         Load and preprocess the dataset, splitting it into train/validation/test sets.
         
@@ -99,6 +99,23 @@ class XGBoostModel:
         # Remove source_employer as it's not needed for prediction
         if 'source_employer' in self.X.columns:
             self.X = self.X.drop(columns=['source_employer'])
+
+        employer_columns = [col for col in self.X.columns if 'Employer' in col]
+        
+        if remove_classifier_columns:
+            columns_to_remove = [
+                'has_rejected_reason',
+                'Active Status',
+                'Closed Status',
+                'Claim Decision',
+                'approval_time',
+                'Claim_Status_Active' ,
+                'Claim_Status_Closed',
+            ]
+
+            columns_to_remove.extend(employer_columns)
+            self.X = self.X.drop(columns=columns_to_remove,errors='ignore')
+
         
         # For regression models, remove specific columns that are not needed
         if not self.is_classifier:
@@ -401,7 +418,7 @@ class XGBoostModel:
 
 
 if __name__ == "__main__":
-    dataset_path = '/Users/kannavsethi/AcclaimProjects/MLModels/data/data_xgboost_combined.csv'
+    dataset_path = '/Users/kannav/Desktop/tmp/AcclaimProjects/MLModels/data/data_xgboost_combined.csv'
     target_regression = 'Duration in Weeks (Business Days)'
     target_classification = 'Claim Decision'
     
@@ -487,3 +504,13 @@ if __name__ == "__main__":
     tuning_results = model9.tune_hyperparameters(type="grid_search",grid_size="small",use_class_weights=True)
     model9.evaluate_model()
 
+
+    print("\n" + "=" * 80)
+    print("MODEL 10: CLASSIFICATION WITH HYPERPARAMETER TUNING USING RANDOM SEARCH AND REMOVING CLASSIFIER COLUMNS")
+    print("=" * 80)
+    model10 = XGBoostModel(verbose=True, use_class_weights=False, is_classifier=True)
+    model10.preprocess_data(dataset_path,target_classification,remove_classifier_columns=True)
+    tuning_results = model10.tune_hyperparameters(type="random_search")
+    model10.evaluate_model()
+
+    
