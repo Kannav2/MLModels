@@ -14,3 +14,6 @@ seaborn>=0.11.0
 
 # For model serialization
 joblib>=1.1.0 
+
+# for configuration 
+toml>=0.10.0
